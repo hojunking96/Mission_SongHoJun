@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -62,7 +61,7 @@ public class LikeablePersonController {
         return "usr/likeablePerson/list";
     }
 
-    @PostMapping("/list/{id}")
+    @GetMapping("/delete/{id}")
     public String delete(@PathVariable("id") Long id) {
         RsData<LikeablePerson> deleteRsData = likeablePersonService.delete(id);
         return rq.redirectWithMsg("/likeablePerson/list", deleteRsData);
