@@ -50,7 +50,7 @@ public class LikeablePersonService {
     }
 
     @Transactional
-    public RsData<LikeablePerson> delete(int id) {
+    public RsData<LikeablePerson> delete(Long id) {
         likeablePersonRepository.deleteById(id);
         return RsData.of("S-1", "선택하신 인스타유저가 호감상대에서 삭제되었습니다.");
     }
