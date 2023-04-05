@@ -65,7 +65,9 @@ public class LikeablePersonController {
     public String delete(@PathVariable("id") Long id) {
 
         RsData<LikeablePerson> deleteRsData = likeablePersonService.delete(rq.getMember(), id);
-
+        if (deleteRsData.getResultCode().equals("F-1")) {
+            return rq.redirectWithMsg("/member/login", deleteRsData);
+        }
         return rq.redirectWithMsg("/likeablePerson/list", deleteRsData);
     }
 }
