@@ -51,22 +51,19 @@ public class LikeablePersonService {
 
     @Transactional
     public RsData<LikeablePerson> delete(Member member, Long id) {
-        if (member == null) {
-            return RsData.of("F-1", "로그인이 필요합니다.");
-        }
         InstaMember instaMember = member.getInstaMember();
         if (instaMember == null) {
-            return RsData.of("F-2", "인스타 연결이 필요합니다.");
+            return RsData.of("F-1", "인스타 연결이 필요합니다.");
         }
 
         LikeablePerson likeablePerson = likeablePersonRepository.findById(id).orElse(null);
 
         if (likeablePerson == null) {
-            return RsData.of("F-4", "잘못된 항목입니다.");
+            return RsData.of("F-3", "잘못된 항목입니다.");
         }
 
         if (instaMember.getId() != likeablePerson.getFromInstaMember().getId()) {
-            return RsData.of("F-3", "잘못된 접근입니다.");
+            return RsData.of("F-2", "잘못된 접근입니다.");
         }
 
 
