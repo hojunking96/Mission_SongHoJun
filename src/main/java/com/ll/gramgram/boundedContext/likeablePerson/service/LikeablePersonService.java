@@ -21,7 +21,7 @@ public class LikeablePersonService {
 
     @Transactional
     public RsData<LikeablePerson> like(Member member, String username, int attractiveTypeCode) {
-        if ( member.hasConnectedInstaMember() == false ) {
+        if (member.hasConnectedInstaMember() == false) {
             return RsData.of("F-2", "먼저 본인의 인스타그램 아이디를 입력해야 합니다.");
         }
 
@@ -47,5 +47,27 @@ public class LikeablePersonService {
 
     public List<LikeablePerson> findByFromInstaMemberId(Long fromInstaMemberId) {
         return likeablePersonRepository.findByFromInstaMemberId(fromInstaMemberId);
+    }
+
+    @Transactional
+    public RsData<LikeablePerson> delete(Member member, Long id) {
+        InstaMember instaMember = member.getInstaMember();
+        if (instaMember == null) {
+            return RsData.of("F-1", "인스타 연결이 필요합니다.");
+        }
+
+        LikeablePerson likeablePerson = likeablePersonRepository.findById(id).orElse(null);
+
+        if (likeablePerson == null) {
+            return RsData.of("F-3", "잘못된 항목입니다.");
+        }
+
+        if (instaMember.getId() != likeablePerson.getFromInstaMember().getId()) {
+            return RsData.of("F-2", "잘못된 접근입니다.");
+        }
+
+
+        likeablePersonRepository.deleteById(id);
+        return RsData.of("S-1", "호감상대가 삭제되었습니다.");
     }
 }
