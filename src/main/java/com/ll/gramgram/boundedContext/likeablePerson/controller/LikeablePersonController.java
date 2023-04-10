@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,10 +62,7 @@ public class LikeablePersonController {
     }
 
     @GetMapping("/delete/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public String delete(@PathVariable("id") Long id) {
-
-        RsData<LikeablePerson> deleteRsData = likeablePersonService.delete(rq.getMember(), id);
-        return rq.redirectWithMsg("/likeablePerson/list", deleteRsData);
+    public String delete(@PathVariable Long id) {
+        return rq.redirectWithMsg("/likeablePerson/list", "삭제되었습니다.");
     }
 }
