@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -49,25 +50,15 @@ public class LikeablePersonService {
         return likeablePersonRepository.findByFromInstaMemberId(fromInstaMemberId);
     }
 
+    public Optional<LikeablePerson> findById(Long id) {
+        return likeablePersonRepository.findById(id);
+    }
+
     @Transactional
-    public RsData<LikeablePerson> delete(Member member, Long id) {
-        InstaMember instaMember = member.getInstaMember();
-        if (instaMember == null) {
-            return RsData.of("F-1", "인스타 연결이 필요합니다.");
-        }
+    public RsData delete(LikeablePerson likeablePerson) {
+        String toInstaMemberUsername = likeablePerson.getToInstaMember().getUsername();
+        likeablePersonRepository.delete(likeablePerson);
 
-        LikeablePerson likeablePerson = likeablePersonRepository.findById(id).orElse(null);
-
-        if (likeablePerson == null) {
-            return RsData.of("F-3", "잘못된 항목입니다.");
-        }
-
-        if (instaMember.getId() != likeablePerson.getFromInstaMember().getId()) {
-            return RsData.of("F-2", "잘못된 접근입니다.");
-        }
-
-
-        likeablePersonRepository.deleteById(id);
-        return RsData.of("S-1", "호감상대가 삭제되었습니다.");
+        return RsData.of("S-1", "%s님에 대한 호감을 취소하였습니다.".formatted(toInstaMemberUsername));
     }
 }
