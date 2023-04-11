@@ -47,6 +47,11 @@ public class LikeablePersonService {
                             existingLikeablePerson.getAttractiveTypeDisplayName()), existingLikeablePerson);
         }
 
+        List<LikeablePerson> likeablePeople = findByFromInstaMemberId(fromInstaMember.getId());
+        if (likeablePeople.size() >= 10) {
+            return RsData.of("F-4", "최대 등록 수(10)를 초과했습니다.");
+        }
+
         LikeablePerson likeablePerson = LikeablePerson
                 .builder()
                 .fromInstaMember(fromInstaMember) // 호감을 표시하는 사람의 인스타 멤버
@@ -55,7 +60,6 @@ public class LikeablePersonService {
                 .toInstaMemberUsername(toInstaMember.getUsername()) // 중요하지 않음
                 .attractiveTypeCode(attractiveTypeCode) // 1=외모, 2=능력, 3=성격
                 .build();
-
 
         likeablePersonRepository.save(likeablePerson); // 저장
 
