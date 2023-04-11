@@ -44,10 +44,10 @@ public class LikeablePersonService {
                 if (likeablePerson1.getAttractiveTypeCode() == attractiveTypeCode) {
                     return RsData.of("F-3", "이미 등록된 내용입니다.");
                 }
-
-
             }
-
+        }
+        if (likeablePeople.size() >= 10) {
+            return RsData.of("F-4", "최대 등록 수(10)를 초과했습니다.");
         }
 
         LikeablePerson likeablePerson = LikeablePerson
@@ -58,7 +58,6 @@ public class LikeablePersonService {
                 .toInstaMemberUsername(toInstaMember.getUsername()) // 중요하지 않음
                 .attractiveTypeCode(attractiveTypeCode) // 1=외모, 2=능력, 3=성격
                 .build();
-
 
 
         System.out.println("여기에요");
