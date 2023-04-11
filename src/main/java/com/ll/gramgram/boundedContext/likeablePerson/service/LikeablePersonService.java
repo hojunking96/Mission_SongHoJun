@@ -33,21 +33,18 @@ public class LikeablePersonService {
         InstaMember fromInstaMember = member.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
 
-        //from 기준으로 List 가져온다.
-        List<LikeablePerson> likeablePeople = findByFromInstaMemberId(fromInstaMember.getId());
-        //반복문을 돌며 같은 중복 내용이 있는지 확인
-        for (LikeablePerson likeablePerson1 : likeablePeople) {
-            //from ID와 to ID가 같을 때
-            if (likeablePerson1.getFromInstaMember().getId() == fromInstaMember.getId()
-                    && likeablePerson1.getToInstaMember().getId() == toInstaMember.getId()) {
-                //호감 사유도 같을 때 예외 처리
-                if (likeablePerson1.getAttractiveTypeCode() == attractiveTypeCode) {
-                    return RsData.of("F-3", "이미 등록된 내용입니다.");
-                }
+
+        LikeablePerson existingLikeablePerson = likeablePersonRepository
+                .findByFromInstaMemberIdAndToInstaMemberId(fromInstaMember.getId(), toInstaMember.getId());
+
+        if (existingLikeablePerson != null) {
+            if (existingLikeablePerson.getAttractiveTypeCode() == attractiveTypeCode) {
+                return RsData.of("F-3", "이미 등록된 내용입니다.");
             }
-        }
-        if (likeablePeople.size() >= 10) {
-            return RsData.of("F-4", "최대 등록 수(10)를 초과했습니다.");
+            likeablePersonRepository.update(existingLikeablePerson.getId(), attractiveTypeCode);
+            return RsData.of("S-2", "'%s' 에 대한 호감사유를 '%s'에서 '%s'으로 변경합니다."
+                    .formatted(username, existingLikeablePerson.getAttractiveTypeDisplayName(),
+                            existingLikeablePerson.getAttractiveTypeDisplayName()), existingLikeablePerson);
         }
 
         LikeablePerson likeablePerson = LikeablePerson
@@ -60,7 +57,6 @@ public class LikeablePersonService {
                 .build();
 
 
-        System.out.println("여기에요");
         likeablePersonRepository.save(likeablePerson); // 저장
 
         // 너가 좋아하는 호감표시 생겼어.
@@ -69,9 +65,8 @@ public class LikeablePersonService {
         // 너를 좋아하는 호감표시 생겼어.
         toInstaMember.addToLikeablePerson(likeablePerson);
 
-        return RsData.of("S-1", "입력하신 인스타유저(%s)를 호감상대로 등록되었습니다.".
-
-                formatted(username), likeablePerson);
+        return RsData.of("S-1", "입력하신 인스타유저(%s)를 호감상대로 등록되었습니다."
+                .formatted(username), likeablePerson);
     }
 
     public List<LikeablePerson> findByFromInstaMemberId(Long fromInstaMemberId) {
