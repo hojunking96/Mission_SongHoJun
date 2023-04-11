@@ -34,17 +34,17 @@ public class LikeablePersonService {
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
 
 
-        LikeablePerson existingLikeablePerson = likeablePersonRepository
+        LikeablePerson duplicatedLikeablePerson = likeablePersonRepository
                 .findByFromInstaMemberIdAndToInstaMemberId(fromInstaMember.getId(), toInstaMember.getId());
 
-        if (existingLikeablePerson != null) {
-            if (existingLikeablePerson.getAttractiveTypeCode() == attractiveTypeCode) {
+        if (duplicatedLikeablePerson != null) {
+            if (duplicatedLikeablePerson.getAttractiveTypeCode() == attractiveTypeCode) {
                 return RsData.of("F-3", "이미 등록된 내용입니다.");
             }
-            likeablePersonRepository.update(existingLikeablePerson.getId(), attractiveTypeCode);
+            likeablePersonRepository.update(duplicatedLikeablePerson.getId(), attractiveTypeCode);
             return RsData.of("S-2", "'%s' 에 대한 호감사유를 '%s'에서 '%s'으로 변경합니다."
-                    .formatted(username, existingLikeablePerson.getAttractiveTypeDisplayName(),
-                            existingLikeablePerson.getAttractiveTypeDisplayName()), existingLikeablePerson);
+                    .formatted(username, duplicatedLikeablePerson.getAttractiveTypeDisplayName(),
+                            convertAttractiveTypeCodeToString(attractiveTypeCode)));
         }
 
         List<LikeablePerson> likeablePeople = findByFromInstaMemberId(fromInstaMember.getId());
@@ -101,5 +101,12 @@ public class LikeablePersonService {
             return RsData.of("F-2", "권한이 없습니다.");
 
         return RsData.of("S-1", "삭제가능합니다.");
+    }
+    public String convertAttractiveTypeCodeToString(int num) {
+        return switch (num) {
+            case 1 -> "외모";
+            case 2 -> "성격";
+            default -> "능력";
+        };
     }
 }
