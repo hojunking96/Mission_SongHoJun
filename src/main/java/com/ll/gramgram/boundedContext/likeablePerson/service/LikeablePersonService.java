@@ -33,6 +33,23 @@ public class LikeablePersonService {
         InstaMember fromInstaMember = member.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
 
+        //from 기준으로 List 가져온다.
+        List<LikeablePerson> likeablePeople = findByFromInstaMemberId(fromInstaMember.getId());
+        //반복문을 돌며 같은 중복 내용이 있는지 확인
+        for (LikeablePerson likeablePerson1 : likeablePeople) {
+            //from ID와 to ID가 같을 때
+            if (likeablePerson1.getFromInstaMember().getId() == fromInstaMember.getId()
+                    && likeablePerson1.getToInstaMember().getId() == toInstaMember.getId()) {
+                //호감 사유도 같을 때 예외 처리
+                if (likeablePerson1.getAttractiveTypeCode() == attractiveTypeCode) {
+                    return RsData.of("F-3", "이미 등록된 내용입니다.");
+                }
+
+
+            }
+
+        }
+
         LikeablePerson likeablePerson = LikeablePerson
                 .builder()
                 .fromInstaMember(fromInstaMember) // 호감을 표시하는 사람의 인스타 멤버
@@ -42,6 +59,9 @@ public class LikeablePersonService {
                 .attractiveTypeCode(attractiveTypeCode) // 1=외모, 2=능력, 3=성격
                 .build();
 
+
+
+        System.out.println("여기에요");
         likeablePersonRepository.save(likeablePerson); // 저장
 
         // 너가 좋아하는 호감표시 생겼어.
@@ -50,7 +70,9 @@ public class LikeablePersonService {
         // 너를 좋아하는 호감표시 생겼어.
         toInstaMember.addToLikeablePerson(likeablePerson);
 
-        return RsData.of("S-1", "입력하신 인스타유저(%s)를 호감상대로 등록되었습니다.".formatted(username), likeablePerson);
+        return RsData.of("S-1", "입력하신 인스타유저(%s)를 호감상대로 등록되었습니다.".
+
+                formatted(username), likeablePerson);
     }
 
     public List<LikeablePerson> findByFromInstaMemberId(Long fromInstaMemberId) {
