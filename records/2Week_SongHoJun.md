@@ -1,6 +1,4 @@
-# NWeek_OOO.md
-
-## Title: [NWeek] 김멋사
+## Title: [2Week] 송호준
 
 ### 미션 요구사항 분석 & 체크리스트
 
