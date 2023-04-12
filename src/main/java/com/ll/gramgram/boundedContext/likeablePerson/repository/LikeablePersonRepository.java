@@ -12,10 +12,7 @@ import java.util.List;
 public interface LikeablePersonRepository extends JpaRepository<LikeablePerson, Long> {
     List<LikeablePerson> findByFromInstaMemberId(Long fromInstaMemberId);
 
-    LikeablePerson findByFromInstaMemberIdAndToInstaMemberId(Long fromInstaMemberId, Long toInstaMemberId);
+    List<LikeablePerson> findByToInstaMember_username(String username);
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE likeable_person L SET L.attractive_type_code = :attractiveTypeCode WHERE L.id=:id", nativeQuery = true)
-    void update(@Param("id")Long id, @Param("attractiveTypeCode")int attractiveTypeCode);
+    LikeablePerson findByFromInstaMemberIdAndToInstaMember_username(long fromInstaMemberId, String username);
 }
