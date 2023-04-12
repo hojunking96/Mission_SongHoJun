@@ -1,5 +1,6 @@
 package com.ll.gramgram.boundedContext.likeablePerson.service;
 
+import com.ll.gramgram.base.appConfig.AppConfig;
 import com.ll.gramgram.base.rsData.RsData;
 import com.ll.gramgram.boundedContext.instaMember.entity.InstaMember;
 import com.ll.gramgram.boundedContext.instaMember.service.InstaMemberService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,25 +36,52 @@ public class LikeablePersonService {
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
 
 
-        LikeablePerson duplicatedLikeablePerson = likeablePersonRepository
-                .findByFromInstaMemberIdAndToInstaMemberId(fromInstaMember.getId(), toInstaMember.getId());
+        LikeablePerson oldLikeablePerson = likeablePersonRepository
+                .findByFromInstaMemberIdAndToInstaMember_username(fromInstaMember.getId(), username);
 
-        if (duplicatedLikeablePerson != null) {
-            if (duplicatedLikeablePerson.getAttractiveTypeCode() == attractiveTypeCode) {
-                return RsData.of("F-3", "이미 등록된 내용입니다.");
+
+        if (oldLikeablePerson != null) {
+            if (oldLikeablePerson.getAttractiveTypeCode() == attractiveTypeCode) {
+                return RsData.of("F-3", "중복된 내용입니다.");
             }
-            likeablePersonRepository.update(duplicatedLikeablePerson.getId(), attractiveTypeCode);
-            return RsData.of("S-2", "'%s' 에 대한 호감사유를 '%s'에서 '%s'으로 변경합니다."
-                    .formatted(username, duplicatedLikeablePerson.getAttractiveTypeDisplayName(),
-                            convertAttractiveTypeCodeToString(attractiveTypeCode)));
         }
 
         List<LikeablePerson> likeablePeople = findByFromInstaMemberId(fromInstaMember.getId());
-        if (likeablePeople.size() >= 10) {
+        if (likeablePeople.size() >= AppConfig.getLikeablePersonFromMax()) {
             return RsData.of("F-4", "최대 등록 수(10)를 초과했습니다.");
         }
 
-        LikeablePerson likeablePerson = LikeablePerson
+        LikeablePerson likeablePerson;
+
+        if (oldLikeablePerson != null) {
+            likeablePerson = LikeablePerson
+                    .builder()
+                    .createDate(oldLikeablePerson.getCreateDate())
+                    .fromInstaMember(fromInstaMember)
+                    .fromInstaMemberUsername(fromInstaMember.getUsername())
+                    .toInstaMember(toInstaMember)
+                    .toInstaMemberUsername(toInstaMember.getUsername())
+                    .attractiveTypeCode(attractiveTypeCode)
+                    .build();
+
+            System.out.println("여기아래");
+            likeablePersonRepository.delete(oldLikeablePerson);
+            System.out.println("여기위");
+            fromInstaMember.deleteFromLikeablePerson(likeablePerson);
+            toInstaMember.deleteToLikeablePerson(likeablePerson);
+
+            likeablePersonRepository.save(likeablePerson);
+            System.out.println("설");
+            fromInstaMember.addFromLikeablePerson(likeablePerson);
+            toInstaMember.addToLikeablePerson(likeablePerson);
+
+            return RsData.of("S-2", "%s 에 대한 호감사유를 %s에서 %s으로 변경합니다."
+                    .formatted(likeablePerson.getToInstaMemberUsername(),
+                            oldLikeablePerson.getAttractiveTypeDisplayName(),
+                            likeablePerson.getAttractiveTypeDisplayName()), likeablePerson);
+        }
+
+        likeablePerson = LikeablePerson
                 .builder()
                 .fromInstaMember(fromInstaMember) // 호감을 표시하는 사람의 인스타 멤버
                 .fromInstaMemberUsername(member.getInstaMember().getUsername()) // 중요하지 않음
@@ -102,6 +131,7 @@ public class LikeablePersonService {
 
         return RsData.of("S-1", "삭제가능합니다.");
     }
+
     public String convertAttractiveTypeCodeToString(int num) {
         return switch (num) {
             case 1 -> "외모";
