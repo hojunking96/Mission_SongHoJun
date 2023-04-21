@@ -55,13 +55,11 @@ public class InstaMember {
         toLikeablePeople.add(0, likeablePerson);
     }
 
-    public void deleteFromLikeablePerson(LikeablePerson likeablePerson) {
-        fromLikeablePeople.removeIf(oldlikeablePerson -> oldlikeablePerson.getId().equals(likeablePerson.getId()));
+    public void removeFromLikeablePerson(LikeablePerson likeablePerson) {
+        fromLikeablePeople.removeIf(e -> e.equals(likeablePerson));
     }
 
-    public void deleteToLikeablePerson(LikeablePerson likeablePerson) {
-        toLikeablePeople.removeIf(oldlikeablePerson -> oldlikeablePerson.getId().equals(likeablePerson.getId()));
+    public void removeToLikeablePerson(LikeablePerson likeablePerson) {
+        toLikeablePeople.removeIf(e -> e.equals(likeablePerson));
     }
-
-
 }
