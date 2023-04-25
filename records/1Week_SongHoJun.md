@@ -39,7 +39,7 @@
 2. JPARepository 가 제공하는 메소드를 확인하고 필요한 메소드를 찾았다.
     - deleteById() 를 사용했다.
 3. Service 의 메소드를 이용하기 위해 Controller 에서 Service 를 호출했다.
-4. Controller 의 경우 likeablePerson/add 를 보며 모방했다.
+4. Controller 의 경우 likeablePerson/like 를 보며 모방했다.
     - 점프투스프링부트 QnA 게시판의 기능을 참고하기도 했다.
 
 **[특이사항]**
