@@ -38,3 +38,5 @@ out/
 
 ### Custom ###
 application-secret.yml
+
+src/main/generated # 추가해야 합니다. Q 클래스들은 자동으로 생성됩니다. 그 부분은 신경쓰지 마세요.
