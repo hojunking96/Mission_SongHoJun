@@ -39,8 +39,7 @@ public class LikeablePerson extends BaseEntity {
         return modifyUnlockDate.isBefore(LocalDateTime.now());
     }
 
-    //초 단위에서 올림 해주세요.
-    public String getModifyUnlockDateRemainStrHuman() {
+    public String getModifyUnlockDateRemai림nStrHuman() {
         Duration duration = Duration.between(LocalDateTime.now(), modifyUnlockDate);
         Long seconds = duration.getSeconds();
         Long minutes = (seconds + 59) / 60 % 60;
