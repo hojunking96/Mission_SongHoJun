@@ -172,9 +172,7 @@ public class LikeablePersonService {
         String username = likeablePerson.getToInstaMember().getUsername();
 
         modifyAttractionTypeCode(likeablePerson, attractiveTypeCode);
-
         String newAttractiveTypeDisplayName = likeablePerson.getAttractiveTypeDisplayName();
-
         return RsData.of("S-3", "%s님에 대한 호감사유를 %s에서 %s(으)로 변경합니다.".formatted(username, oldAttractiveTypeDisplayName, newAttractiveTypeDisplayName), likeablePerson);
     }
 
@@ -216,7 +214,7 @@ public class LikeablePersonService {
             return RsData.of("F-2", "해당 호감표시를 변경할 권한이 없습니다.");
         }
         if (!likeablePerson.isModifyUnlocked()) {
-            return RsData.of("F-3", "호감표시 변경 가능시간이 아닙니다. %s 에 가능합니다."
+            return RsData.of("F-3", "해당 요청은 변경 대기 시간이 자나지 않았습니다. %s에 가능합니다."
                     .formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
         }
         return RsData.of("S-1", "호감표시 변경이 가능합니다.");

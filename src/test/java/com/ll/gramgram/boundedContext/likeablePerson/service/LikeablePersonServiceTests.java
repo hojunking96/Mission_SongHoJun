@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional
@@ -259,6 +260,9 @@ public class LikeablePersonServiceTests {
         // 수정을 하면 쿨타임이 갱신된다.
         likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 1);
 
+        System.out.println("쿨타임 : " + coolTime);
+        System.out.println("변경 후 쿨타임 : " + likeablePersonToBts.getModifyUnlockDate());
+
         // 갱신 되었는지 확인
         assertThat(
                 likeablePersonToBts.getModifyUnlockDate().isAfter(coolTime)
@@ -268,10 +272,8 @@ public class LikeablePersonServiceTests {
     @Test
     @DisplayName("호감사유 변경 후 쿨타임이 지나지 않으면 호감사유를 변경하지 못한다.")
     void t009() throws Exception {
-        // 현재시점 기준에서 쿨타임이 다 차는 시간을 구한다.(미래)
-        LocalDateTime coolTime = AppConfig.genLikeablePersonModifyUnlockDate();
-
         Member memberUser3 = memberService.findByUsername("user3").orElseThrow();
+
         // 호감표시를 생성한다.
         LikeablePerson likeablePersonToBts = likeablePersonService.like(memberUser3, "bts", 3).getData();
 
@@ -287,7 +289,25 @@ public class LikeablePersonServiceTests {
         RsData<LikeablePerson> rsData = likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 2);
 
         // 갱신이 되지 않고 실패를 반환하는지 확인
+        assertTrue(rsData.isFail());
+        assert (rsData.getResultCode().equals("F-3"));
+        assert (likeablePersonToBts.getAttractiveTypeCode() == 1);
+    }
+
+    @Test
+    @DisplayName("호감사유 등록 후 쿨타임이 지나지 않으면 호감사유를 변경하지 못한다.")
+    void t010() throws Exception {
+        Member memberUser3 = memberService.findByUsername("user3").orElseThrow();
+
+        // 호감표시를 생성한다.
+        LikeablePerson likeablePersonToBts = likeablePersonService.like(memberUser3, "bts", 3).getData();
+
+        // 쿨타임이 지나지 않은채로 갱신을 시도한다.
+        RsData<LikeablePerson> rsData = likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 2);
+
+        // 갱신이 되지 않고 실패를 반환하는지 확인
         assertThat(rsData.isFail()).isTrue();
-        assertThat(rsData.getResultCode().equals("F-3"));
+        assert (rsData.getResultCode().equals("F-3"));
+        assert (likeablePersonToBts.getAttractiveTypeCode() == 3);
     }
 }
