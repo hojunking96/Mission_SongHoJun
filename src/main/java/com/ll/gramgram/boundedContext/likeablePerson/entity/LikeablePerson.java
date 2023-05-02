@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @ToString(callSuper = true)
 public class LikeablePerson extends BaseEntity {
-    private LocalDateTime modifyUnlockDate;
+//    private LocalDateTime modifyUnlockDate;
 
     @ManyToOne
     @ToString.Exclude
@@ -34,14 +34,14 @@ public class LikeablePerson extends BaseEntity {
 
     private int attractiveTypeCode; // 매력포인트(1=외모, 2=성격, 3=능력)
 
-    public boolean isModifyUnlocked() {
-        return modifyUnlockDate.isBefore(LocalDateTime.now());
-    }
+//    public boolean isModifyUnlocked() {
+//        return modifyUnlockDate.isBefore(LocalDateTime.now());
+//    }
 
     // 초 단위에서 올림 해주세요.
-    public String getModifyUnlockDateRemainStrHuman() {
-        return "2시간 16분";
-    }
+//    public String getModifyUnlockDateRemainStrHuman() {
+//        return "2시간 16분";
+//    }
 
     public RsData updateAttractionTypeCode(int attractiveTypeCode) {
         if (this.attractiveTypeCode == attractiveTypeCode) {
@@ -49,7 +49,7 @@ public class LikeablePerson extends BaseEntity {
         }
 
         this.attractiveTypeCode = attractiveTypeCode;
-        this.modifyUnlockDate = AppConfig.genLikeablePersonModifyUnlockDate();
+//        this.modifyUnlockDate = AppConfig.genLikeablePersonModifyUnlockDate();
 
         return RsData.of("S-1", "성공");
     }

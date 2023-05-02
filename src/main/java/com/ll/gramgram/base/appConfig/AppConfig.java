@@ -16,15 +16,15 @@ public class AppConfig {
         AppConfig.likeablePersonFromMax = likeablePersonFromMax;
     }
 
-    @Getter
-    private static long likeablePersonModifyCoolTime;
+//    @Getter
+//    private static long likeablePersonModifyCoolTime;
+//
+//    @Value("${custom.likeablePerson.modifyCoolTime}")
+//    public void setLikeablePersonModifyCoolTime(long likeablePersonModifyCoolTime) {
+//        AppConfig.likeablePersonModifyCoolTime = likeablePersonModifyCoolTime;
+//    }
 
-    @Value("${custom.likeablePerson.modifyCoolTime}")
-    public void setLikeablePersonModifyCoolTime(long likeablePersonModifyCoolTime) {
-        AppConfig.likeablePersonModifyCoolTime = likeablePersonModifyCoolTime;
-    }
-
-    public static LocalDateTime genLikeablePersonModifyUnlockDate() {
-        return LocalDateTime.now().plusSeconds(likeablePersonModifyCoolTime);
-    }
+//    public static LocalDateTime genLikeablePersonModifyUnlockDate() {
+//        return LocalDateTime.now().plusSeconds(likeablePersonModifyCoolTime);
+//    }
 }
