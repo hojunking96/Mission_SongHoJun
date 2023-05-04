@@ -96,7 +96,8 @@ public class LikeablePersonService {
         if (actorInstaMemberId != fromInstaMemberId)
             return RsData.of("F-2", "취소할 권한이 없습니다.");
 
-        if (!likeablePerson.isModifyUnlocked()) return RsData.of("F-3", "아직 취소할 수 없습니다. %s에는 가능합니다.".formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
+        if (!likeablePerson.isModifyUnlocked())
+            return RsData.of("F-3", "아직 취소할 수 없습니다. %s에는 가능합니다.".formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
 
         return RsData.of("S-1", "취소가 가능합니다.");
     }
@@ -174,7 +175,8 @@ public class LikeablePersonService {
         return RsData.of("S-3", "%s님에 대한 호감사유를 %s에서 %s(으)로 변경합니다.".formatted(username, oldAttractiveTypeDisplayName, newAttractiveTypeDisplayName), likeablePerson);
     }
 
-    private RsData<LikeablePerson> modifyAttractive(Member actor, String username, int attractiveTypeCode) {
+    @Transactional
+    public RsData<LikeablePerson> modifyAttractive(Member actor, String username, int attractiveTypeCode) {
         // 액터가 생성한 `좋아요` 들 가져오기
         List<LikeablePerson> fromLikeablePeople = actor.getInstaMember().getFromLikeablePeople();
 
@@ -211,7 +213,8 @@ public class LikeablePersonService {
             return RsData.of("F-2", "해당 호감표시에 대해서 사유변경을 수행할 권한이 없습니다.");
         }
 
-        if (!likeablePerson.isModifyUnlocked()) return RsData.of("F-3", "아직 호감사유변경을 할 수 없습니다. %s에는 가능합니다.".formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
+        if (!likeablePerson.isModifyUnlocked())
+            return RsData.of("F-3", "아직 호감사유변경을 할 수 없습니다. %s에는 가능합니다.".formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
 
 
         return RsData.of("S-1", "호감사유변경이 가능합니다.");
