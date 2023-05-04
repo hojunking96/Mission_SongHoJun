@@ -31,13 +31,9 @@ public class LikeablePersonService {
     public RsData<LikeablePerson> like(Member actor, String username, int attractiveTypeCode) {
         RsData canLikeRsData = canLike(actor, username, attractiveTypeCode);
 
-        if (canLikeRsData.isFail()) {
-            return canLikeRsData;
-        }
+        if (canLikeRsData.isFail()) return canLikeRsData;
 
-        if (canLikeRsData.getResultCode().equals("S-2")) {
-            return modifyAttractive(actor, username, attractiveTypeCode);
-        }
+        if (canLikeRsData.getResultCode().equals("S-2")) return modifyAttractive(actor, username, attractiveTypeCode);
 
         InstaMember fromInstaMember = actor.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
@@ -90,7 +86,7 @@ public class LikeablePersonService {
     }
 
     public RsData canCancel(Member actor, LikeablePerson likeablePerson) {
-        if (likeablePerson == null) return RsData.of("F-1", "이미 삭제되었습니다.");
+        if (likeablePerson == null) return RsData.of("F-1", "이미 취소되었습니다.");
 
         // 수행자의 인스타계정 번호
         long actorInstaMemberId = actor.getInstaMember().getId();
@@ -98,9 +94,11 @@ public class LikeablePersonService {
         long fromInstaMemberId = likeablePerson.getFromInstaMember().getId();
 
         if (actorInstaMemberId != fromInstaMemberId)
-            return RsData.of("F-2", "권한이 없습니다.");
+            return RsData.of("F-2", "취소할 권한이 없습니다.");
 
-        return RsData.of("S-1", "삭제가능합니다.");
+        if (!likeablePerson.isModifyUnlocked()) return RsData.of("F-3", "아직 취소할 수 없습니다. %s에 취소가 가능합니다.".formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
+
+        return RsData.of("S-1", "취소가 가능합니다.");
     }
 
     private RsData canLike(Member actor, String username, int attractiveTypeCode) {
@@ -145,7 +143,6 @@ public class LikeablePersonService {
         return likeablePersonRepository.findByFromInstaMember_usernameAndToInstaMember_username(fromInstaMemberUsername, toInstaMemberUsername);
     }
 
-    //직접 수정 기능
     @Transactional
     public RsData<LikeablePerson> modifyAttractive(Member actor, Long id, int attractiveTypeCode) {
         Optional<LikeablePerson> likeablePersonOptional = findById(id);
@@ -159,7 +156,6 @@ public class LikeablePersonService {
         return modifyAttractive(actor, likeablePerson, attractiveTypeCode);
     }
 
-    //직, 간접 수정기능에 대한 실제 수정 작업
     @Transactional
     public RsData<LikeablePerson> modifyAttractive(Member actor, LikeablePerson likeablePerson, int attractiveTypeCode) {
         RsData canModifyRsData = canModifyLike(actor, likeablePerson);
@@ -172,11 +168,12 @@ public class LikeablePersonService {
         String username = likeablePerson.getToInstaMember().getUsername();
 
         modifyAttractionTypeCode(likeablePerson, attractiveTypeCode);
+
         String newAttractiveTypeDisplayName = likeablePerson.getAttractiveTypeDisplayName();
+
         return RsData.of("S-3", "%s님에 대한 호감사유를 %s에서 %s(으)로 변경합니다.".formatted(username, oldAttractiveTypeDisplayName, newAttractiveTypeDisplayName), likeablePerson);
     }
 
-    //Like 에서 넘어온 간접 수정 기능
     private RsData<LikeablePerson> modifyAttractive(Member actor, String username, int attractiveTypeCode) {
         // 액터가 생성한 `좋아요` 들 가져오기
         List<LikeablePerson> fromLikeablePeople = actor.getInstaMember().getFromLikeablePeople();
@@ -211,12 +208,10 @@ public class LikeablePersonService {
         InstaMember fromInstaMember = actor.getInstaMember();
 
         if (!Objects.equals(likeablePerson.getFromInstaMember().getId(), fromInstaMember.getId())) {
-            return RsData.of("F-2", "해당 호감표시를 변경할 권한이 없습니다.");
+            return RsData.of("F-2", "해당 호감표시를 취소할 권한이 없습니다.");
         }
-        if (!likeablePerson.isModifyUnlocked()) {
-            return RsData.of("F-3", "해당 요청은 변경 대기 시간이 자나지 않았습니다. %s에 가능합니다."
-                    .formatted(likeablePerson.getModifyUnlockDateRemainStrHuman()));
-        }
-        return RsData.of("S-1", "호감표시 변경이 가능합니다.");
+
+
+        return RsData.of("S-1", "호감표시취소가 가능합니다.");
     }
 }
