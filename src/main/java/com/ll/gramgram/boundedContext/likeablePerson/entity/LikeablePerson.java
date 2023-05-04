@@ -40,11 +40,7 @@ public class LikeablePerson extends BaseEntity {
     }
 
     public String getModifyUnlockDateRemainStrHuman() {
-        Duration duration = Duration.between(LocalDateTime.now(), modifyUnlockDate);
-        Long seconds = duration.getSeconds();
-        Long minutes = (seconds + 59) / 60 % 60;
-        Long hours = (seconds + 59) / 3600;
-        return "%s시간 %s분 후".formatted(hours, minutes);
+        return Ut.time.diffFormat1Human(LocalDateTime.now(), modifyUnlockDate);
     }
 
     public RsData updateAttractionTypeCode(int attractiveTypeCode) {
