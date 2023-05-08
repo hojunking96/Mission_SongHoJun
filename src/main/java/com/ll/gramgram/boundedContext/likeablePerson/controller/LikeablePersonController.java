@@ -124,31 +124,14 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/toList")
     public String showToList(@RequestParam(name = "gender", required = false) String gender,
-                             @RequestParam(name = "attractiveTypeCode", required = false) String attractiveTypeCode,
+                             @RequestParam(name = "attractiveTypeCode", required = false) Integer attractiveTypeCode,
                              Model model) {
         InstaMember instaMember = rq.getMember().getInstaMember();
 
         // 인스타인증을 했는지 체크
         if (instaMember != null) {
-            // 해당 인스타회원이 좋아하는 사람들 목록
-            Stream<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople().stream();
-            if (gender != null) {
-                if (gender.equals("M")) {
-                    likeablePeopleStream = likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("M"));
-                } else if (gender.equals("W")) {
-                    likeablePeopleStream = likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("W"));
-                }
-            }
-            if (attractiveTypeCode != null) {
-                if (attractiveTypeCode.equals("1")) {
-                    likeablePeopleStream = likeablePeopleStream.filter(x -> x.getAttractiveTypeCode() == 1);
-                } else if (attractiveTypeCode.equals("2")) {
-                    likeablePeopleStream = likeablePeopleStream.filter(x -> x.getAttractiveTypeCode() == 2);
-                } else if (attractiveTypeCode.equals("3")) {
-                    likeablePeopleStream = likeablePeopleStream.filter(x -> x.getAttractiveTypeCode() == 3);
-                }
-            }
-            model.addAttribute("likeablePeople", likeablePeopleStream.toList());
+            List<LikeablePerson> likeablePeople = likeablePersonService.classify(instaMember, gender, attractiveTypeCode);
+            model.addAttribute("likeablePeople", likeablePeople);
         }
         return "usr/likeablePerson/toList";
     }

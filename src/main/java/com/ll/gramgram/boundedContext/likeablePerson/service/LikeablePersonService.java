@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -218,5 +219,30 @@ public class LikeablePersonService {
 
 
         return RsData.of("S-1", "호감사유변경이 가능합니다.");
+    }
+
+    public List<LikeablePerson> classify(InstaMember instaMember, String gender, Integer attractiveTypeCode) {
+        Stream<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople().stream();
+        likeablePeopleStream = classifyByGender(likeablePeopleStream, gender);
+        likeablePeopleStream = classifyByAttractiveTypeCode(likeablePeopleStream, attractiveTypeCode);
+        return likeablePeopleStream.toList();
+    }
+
+    public Stream<LikeablePerson> classifyByGender(Stream<LikeablePerson> likeablePeopleStream, String gender) {
+        if (gender != null) {
+            if (gender.equals("M")) {
+                return likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("M"));
+            } else if (gender.equals("W")) {
+                return likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("W"));
+            }
+        }
+        return likeablePeopleStream;
+    }
+
+    private Stream<LikeablePerson> classifyByAttractiveTypeCode(Stream<LikeablePerson> likeablePeopleStream, Integer attractiveTypeCode) {
+        if (attractiveTypeCode != null) {
+            return likeablePeopleStream.filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode);
+        }
+        return likeablePeopleStream;
     }
 }
