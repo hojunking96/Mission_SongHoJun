@@ -122,7 +122,9 @@ public class LikeablePersonController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/toList")
-    public String showToList(@RequestParam(name = "gender", required = false) String gender, Model model) {
+    public String showToList(@RequestParam(name = "gender", required = false) String gender,
+                             @RequestParam(name = "attractiveTypeCode", required = false) String attractiveTypeCode,
+                             Model model) {
         InstaMember instaMember = rq.getMember().getInstaMember();
 
         // 인스타인증을 했는지 체크
@@ -139,6 +141,21 @@ public class LikeablePersonController {
                     likeablePeople = instaMember.getToLikeablePeople()
                             .stream()
                             .filter(x -> x.getFromInstaMember().getGender().equals("W"))
+                            .toList();
+                }
+            }
+            if (attractiveTypeCode != null) {
+                if (attractiveTypeCode.equals("1")) {
+                    likeablePeople = likeablePeople.stream()
+                            .filter(x -> x.getAttractiveTypeCode() == 1)
+                            .toList();
+                } else if (attractiveTypeCode.equals("2")) {
+                    likeablePeople = likeablePeople.stream()
+                            .filter(x -> x.getAttractiveTypeCode() == 2)
+                            .toList();
+                } else if (attractiveTypeCode.equals("3")) {
+                    likeablePeople = likeablePeople.stream()
+                            .filter(x -> x.getAttractiveTypeCode() == 3)
                             .toList();
                 }
             }
