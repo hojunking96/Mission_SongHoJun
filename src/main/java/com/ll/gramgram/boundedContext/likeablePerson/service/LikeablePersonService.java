@@ -222,26 +222,26 @@ public class LikeablePersonService {
     }
 
     public List<LikeablePerson> classify(InstaMember instaMember, String gender, Integer attractiveTypeCode) {
-        Stream<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople().stream();
+        List<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople();
         likeablePeopleStream = classifyByGender(likeablePeopleStream, gender);
         likeablePeopleStream = classifyByAttractiveTypeCode(likeablePeopleStream, attractiveTypeCode);
-        return likeablePeopleStream.toList();
+        return likeablePeopleStream;
     }
 
-    private Stream<LikeablePerson> classifyByGender(Stream<LikeablePerson> likeablePeopleStream, String gender) {
+    private List<LikeablePerson> classifyByGender(List<LikeablePerson> likeablePeopleStream, String gender) {
         if (gender != null) {
             if (gender.equals("M")) {
-                return likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("M"));
+                return likeablePeopleStream.stream().filter(x -> x.getFromInstaMember().getGender().equals("M")).toList();
             } else if (gender.equals("W")) {
-                return likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("W"));
+                return likeablePeopleStream.stream().filter(x -> x.getFromInstaMember().getGender().equals("W")).toList();
             }
         }
         return likeablePeopleStream;
     }
 
-    private Stream<LikeablePerson> classifyByAttractiveTypeCode(Stream<LikeablePerson> likeablePeopleStream, Integer attractiveTypeCode) {
+    private List<LikeablePerson> classifyByAttractiveTypeCode(List<LikeablePerson> likeablePeopleStream, Integer attractiveTypeCode) {
         if (attractiveTypeCode != null) {
-            return likeablePeopleStream.filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode);
+            return likeablePeopleStream.stream().filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode).toList();
         }
         return likeablePeopleStream;
     }
