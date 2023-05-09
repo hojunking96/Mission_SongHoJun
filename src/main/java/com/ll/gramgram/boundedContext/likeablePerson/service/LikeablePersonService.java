@@ -228,7 +228,7 @@ public class LikeablePersonService {
         return likeablePeopleStream.toList();
     }
 
-    public Stream<LikeablePerson> classifyByGender(Stream<LikeablePerson> likeablePeopleStream, String gender) {
+    private Stream<LikeablePerson> classifyByGender(Stream<LikeablePerson> likeablePeopleStream, String gender) {
         if (gender != null) {
             if (gender.equals("M")) {
                 return likeablePeopleStream.filter(x -> x.getFromInstaMember().getGender().equals("M"));
