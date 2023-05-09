@@ -5,6 +5,7 @@ import com.ll.gramgram.TestUt;
 import com.ll.gramgram.base.appConfig.AppConfig;
 import com.ll.gramgram.base.rsData.RsData;
 import com.ll.gramgram.boundedContext.instaMember.entity.InstaMember;
+import com.ll.gramgram.boundedContext.instaMember.repository.InstaMemberRepository;
 import com.ll.gramgram.boundedContext.likeablePerson.entity.LikeablePerson;
 import com.ll.gramgram.boundedContext.likeablePerson.repository.LikeablePersonRepository;
 import com.ll.gramgram.boundedContext.member.entity.Member;
@@ -35,6 +36,8 @@ public class LikeablePersonServiceTests {
     private LikeablePersonService likeablePersonService;
     @Autowired
     private LikeablePersonRepository likeablePersonRepository;
+    @Autowired
+    private InstaMemberRepository instaMemberRepository;
 
     @Test
     @DisplayName("테스트 1")
@@ -309,5 +312,31 @@ public class LikeablePersonServiceTests {
         assertThat(rsData.isFail()).isTrue();
         assert (rsData.getResultCode().equals("F-3"));
         assert (likeablePersonToBts.getAttractiveTypeCode() == 3);
+    }
+
+    @Test
+    @DisplayName("받은 호감목록 성별 필터링 : 남성 - 숫자 비교")
+    void t011() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 남성
+        List<LikeablePerson> likeInstaUser4FilterMan = likeablePersonService.classify(user4, "M", null);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterMan.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("받은 호감목록 성별 필터링 : 여성 - 숫자 비교")
+    void t012() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 여성
+        List<LikeablePerson> likeInstaUser4FilterWoman = likeablePersonService.classify(user4, "W", null);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterWoman.size()).isEqualTo(3);
     }
 }
