@@ -376,4 +376,16 @@ public class LikeablePersonServiceTests {
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterAbility.size()).isEqualTo(1);
     }
+    @Test
+    @DisplayName("받은 호감목록 성별, 호감사유 필터링 - 여성 & 외모")
+    void t016() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 여성, 외모 선택
+        List<LikeablePerson> likeInstaUser4FilterByWomanAndAppearance = likeablePersonService.classify(user4, null, 1);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterByWomanAndAppearance.size()).isEqualTo(2);
+    }
 }
