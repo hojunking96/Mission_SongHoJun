@@ -339,4 +339,41 @@ public class LikeablePersonServiceTests {
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterWoman.size()).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("받은 호감목록 호감사유 필터링 - 외모")
+    void t013() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 외모 선택
+        List<LikeablePerson> likeInstaUser4FilterAppearance = likeablePersonService.classify(user4, null, 1);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterAppearance.size()).isEqualTo(3);
+    }
+    @Test
+    @DisplayName("받은 호감목록 호감사유 필터링 - 성격")
+    void t014() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 성격 선택
+        List<LikeablePerson> likeInstaUser4FilterCharacter = likeablePersonService.classify(user4, null, 2);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterCharacter.size()).isEqualTo(1);
+    }
+    @Test
+    @DisplayName("받은 호감목록 호감사유 필터링 - 능력")
+    void t015() throws Exception {
+        //user4에 대해서 탐색
+        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
+        //user4를 좋아하는 모든 성별
+        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
+        //user4를 호감표시 한 사람 중 능력 선택
+        List<LikeablePerson> likeInstaUser4FilterAbility = likeablePersonService.classify(user4, null, 3);
+        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        assertThat(likeInstaUser4FilterAbility.size()).isEqualTo(1);
+    }
 }
