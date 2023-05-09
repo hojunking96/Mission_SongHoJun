@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -222,27 +223,59 @@ public class LikeablePersonService {
     }
 
     public List<LikeablePerson> classify(InstaMember instaMember, String gender, Integer attractiveTypeCode) {
-        List<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople();
-        likeablePeopleStream = classifyByGender(likeablePeopleStream, gender);
-        likeablePeopleStream = classifyByAttractiveTypeCode(likeablePeopleStream, attractiveTypeCode);
-        return likeablePeopleStream;
+        List<LikeablePerson> likeablePeople = instaMember.getToLikeablePeople();
+        likeablePeople = classifyByGender(likeablePeople, gender);
+        likeablePeople = classifyByAttractiveTypeCode(likeablePeople, attractiveTypeCode);
+        return likeablePeople;
     }
 
-    private List<LikeablePerson> classifyByGender(List<LikeablePerson> likeablePeopleStream, String gender) {
+    private List<LikeablePerson> classifyByGender(List<LikeablePerson> likeablePeople, String gender) {
         if (gender != null) {
             if (gender.equals("M")) {
-                return likeablePeopleStream.stream().filter(x -> x.getFromInstaMember().getGender().equals("M")).toList();
+                return likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("M")).toList();
             } else if (gender.equals("W")) {
-                return likeablePeopleStream.stream().filter(x -> x.getFromInstaMember().getGender().equals("W")).toList();
+                return likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("W")).toList();
             }
         }
-        return likeablePeopleStream;
+        return likeablePeople;
     }
 
-    private List<LikeablePerson> classifyByAttractiveTypeCode(List<LikeablePerson> likeablePeopleStream, Integer attractiveTypeCode) {
+    private List<LikeablePerson> classifyByAttractiveTypeCode(List<LikeablePerson> likeablePeople, Integer attractiveTypeCode) {
         if (attractiveTypeCode != null) {
-            return likeablePeopleStream.stream().filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode).toList();
+            return likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode).toList();
         }
-        return likeablePeopleStream;
+        return likeablePeople;
+    }
+
+    public List<LikeablePerson> sortBySortCode(List<LikeablePerson> likeablePeople, Integer sortCode) {
+        Stream<LikeablePerson> likeablePeopleStream = likeablePeople.stream();
+        if (sortCode == 1) {
+            likeablePeopleStream = likeablePeopleStream
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+        } else if (sortCode == 2) {
+            likeablePeopleStream = likeablePeopleStream
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate));
+        } else if (sortCode == 3) {
+            likeablePeopleStream = likeablePeopleStream
+                    .sorted((o1, o2) -> Math.toIntExact(o2.getFromInstaMember().getLikes() - o1.getFromInstaMember().getLikes()));
+        } else if (sortCode == 4) {
+            likeablePeopleStream = likeablePeopleStream
+                    .sorted(Comparator.comparingLong(o -> o.getFromInstaMember().getLikes()));
+        } else if (sortCode == 5) {
+            Stream<LikeablePerson> fromFemale = likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("W"))
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+            Stream<LikeablePerson> fromMale = likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("M"))
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+            likeablePeopleStream = Stream.concat(fromFemale, fromMale);
+        } else if (sortCode == 6) {
+            Stream<LikeablePerson> byAppearance = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 1)
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+            Stream<LikeablePerson> byPersonality = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 2)
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+            Stream<LikeablePerson> byAbility = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 3)
+                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
+            likeablePeopleStream = Stream.concat(byAppearance, Stream.concat(byPersonality, byAbility));
+        }
+        return likeablePeopleStream.toList();
     }
 }
