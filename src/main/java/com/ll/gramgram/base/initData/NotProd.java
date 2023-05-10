@@ -80,7 +80,6 @@ public class NotProd {
                 LikeablePerson likeablePersonToInstaUser100 = likeablePersonService.like(memberUser3, "insta_user100", 2).getData();
                 Ut.reflection.setFieldValue(likeablePersonToInstaUser100, "modifyUnlockDate", LocalDateTime.now().minusSeconds(1));
                 LikeablePerson likeablePersonToInstaUserAbcd = likeablePersonService.like(memberUser3, "insta_user_abcd", 2).getData();
-                Ut.reflection.setFieldValue(likeablePersonToInstaUserAbcd, "modifyUnlockDate", LocalDateTime.now().minusSeconds(1));
 
                 //테스트 위해서 추가
                 LikeablePerson likeablePersonToInstaUser4_2 = likeablePersonService.like(memberUser91, "insta_user4", 2).getData();
