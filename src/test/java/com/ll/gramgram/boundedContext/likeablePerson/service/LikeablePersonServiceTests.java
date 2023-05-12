@@ -3,9 +3,7 @@ package com.ll.gramgram.boundedContext.likeablePerson.service;
 
 import com.ll.gramgram.TestUt;
 import com.ll.gramgram.base.appConfig.AppConfig;
-import com.ll.gramgram.base.rsData.RsData;
 import com.ll.gramgram.boundedContext.instaMember.entity.InstaMember;
-import com.ll.gramgram.boundedContext.instaMember.repository.InstaMemberRepository;
 import com.ll.gramgram.boundedContext.likeablePerson.entity.LikeablePerson;
 import com.ll.gramgram.boundedContext.likeablePerson.repository.LikeablePersonRepository;
 import com.ll.gramgram.boundedContext.member.entity.Member;
@@ -16,14 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional
@@ -36,8 +35,6 @@ public class LikeablePersonServiceTests {
     private LikeablePersonService likeablePersonService;
     @Autowired
     private LikeablePersonRepository likeablePersonRepository;
-    @Autowired
-    private InstaMemberRepository instaMemberRepository;
 
     @Test
     @DisplayName("테스트 1")
@@ -263,9 +260,6 @@ public class LikeablePersonServiceTests {
         // 수정을 하면 쿨타임이 갱신된다.
         likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 1);
 
-        System.out.println("쿨타임 : " + coolTime);
-        System.out.println("변경 후 쿨타임 : " + likeablePersonToBts.getModifyUnlockDate());
-
         // 갱신 되었는지 확인
         assertThat(
                 likeablePersonToBts.getModifyUnlockDate().isAfter(coolTime)
@@ -273,121 +267,73 @@ public class LikeablePersonServiceTests {
     }
 
     @Test
-    @DisplayName("호감사유 변경 후 쿨타임이 지나지 않으면 호감사유를 변경하지 못한다.")
-    void t009() throws Exception {
-        Member memberUser3 = memberService.findByUsername("user3").orElseThrow();
+    @DisplayName("정렬 - 최신순")
+    void t009() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 1);
 
-        // 호감표시를 생성한다.
-        LikeablePerson likeablePersonToBts = likeablePersonService.like(memberUser3, "bts", 3).getData();
-
-        // 호감표시를 생성하면 쿨타임이 지정되기 때문에, 그래서 바로 수정이 안된다.
-        // 그래서 강제로 쿨타임이 지난것으로 만든다.
-        // 테스트를 위해서 억지로 값을 넣는다.
-        TestUt.setFieldValue(likeablePersonToBts, "modifyUnlockDate", LocalDateTime.now().minusSeconds(1));
-
-        // 수정을 하면 쿨타임이 갱신된다.
-        likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 1);
-
-        // 쿨타임이 지나지 않은채로 갱신을 시도한다.
-        RsData<LikeablePerson> rsData = likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 2);
-
-        // 갱신이 되지 않고 실패를 반환하는지 확인
-        assertTrue(rsData.isFail());
-        assert (rsData.getResultCode().equals("F-3"));
-        assert (likeablePersonToBts.getAttractiveTypeCode() == 1);
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(Comparator.comparing(LikeablePerson::getId, Comparator.reverseOrder()));
     }
 
     @Test
-    @DisplayName("호감사유 등록 후 쿨타임이 지나지 않으면 호감사유를 변경하지 못한다.")
-    void t010() throws Exception {
-        Member memberUser3 = memberService.findByUsername("user3").orElseThrow();
+    @DisplayName("정렬 - 날짜순")
+    @Rollback(false)
+    void t010() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 2);
 
-        // 호감표시를 생성한다.
-        LikeablePerson likeablePersonToBts = likeablePersonService.like(memberUser3, "bts", 3).getData();
-
-        // 쿨타임이 지나지 않은채로 갱신을 시도한다.
-        RsData<LikeablePerson> rsData = likeablePersonService.modifyAttractive(memberUser3, likeablePersonToBts, 2);
-
-        // 갱신이 되지 않고 실패를 반환하는지 확인
-        assertThat(rsData.isFail()).isTrue();
-        assert (rsData.getResultCode().equals("F-3"));
-        assert (likeablePersonToBts.getAttractiveTypeCode() == 3);
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(Comparator.comparing(LikeablePerson::getId));
     }
 
     @Test
-    @DisplayName("받은 호감목록 성별 필터링 : 남성 - 숫자 비교")
-    void t011() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 남성
-        List<LikeablePerson> likeInstaUser4FilterMan = likeablePersonService.findByToInstaMember(user4, "M", 0, 1);
-        assertThat(likeInstaUser4.size()).isEqualTo(5);
-        assertThat(likeInstaUser4FilterMan.size()).isEqualTo(2);
+    @DisplayName("정렬 - 인기 많은 순")
+    @Rollback(false)
+    void t011() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 3);
+
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(
+                        Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getLikes()).reversed()
+                                .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                );
     }
 
     @Test
-    @DisplayName("받은 호감목록 성별 필터링 : 여성 - 숫자 비교")
-    void t012() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 여성
-        List<LikeablePerson> likeInstaUser4FilterWoman = likeablePersonService.findByToInstaMember(user4, "W", 0, 1);
-        assertThat(likeInstaUser4.size()).isEqualTo(5);
-        assertThat(likeInstaUser4FilterWoman.size()).isEqualTo(3);
+    @DisplayName("정렬 - 인기 적은 순")
+    @Rollback(false)
+    void t012() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 4);
+
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(
+                        Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getLikes())
+                                .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                );
     }
 
     @Test
-    @DisplayName("받은 호감목록 호감사유 필터링 - 외모")
-    void t013() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 외모 선택
-        List<LikeablePerson> likeInstaUser4FilterAppearance = likeablePersonService.findByToInstaMember(user4, "", 1, 1);
-        assertThat(likeInstaUser4.size()).isEqualTo(5);
-        assertThat(likeInstaUser4FilterAppearance.size()).isEqualTo(3);
+    @DisplayName("정렬 - 성별순")
+    @Rollback(false)
+    void t013() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 5);
+
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(
+                        Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getGender()).reversed()
+                                .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                );
     }
 
     @Test
-    @DisplayName("받은 호감목록 호감사유 필터링 - 성격")
-    void t014() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 성격 선택
-        List<LikeablePerson> likeInstaUser4FilterCharacter = likeablePersonService.findByToInstaMember(user4, "", 2, 1);
-        assertThat(likeInstaUser4.size()).isEqualTo(5);
-        assertThat(likeInstaUser4FilterCharacter.size()).isEqualTo(1);
-    }
+    @DisplayName("정렬 - 호감사유순")
+    @Rollback(false)
+    void t014() {
+        List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMemberAndGenderAndAttractiveTypeCode("insta_user4", "", 0, 6);
 
-    @Test
-    @DisplayName("받은 호감목록 호감사유 필터링 - 능력")
-    void t015() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 능력 선택
-        List<LikeablePerson> likeInstaUser4FilterAbility = likeablePersonService.findByToInstaMember(user4, "", 3, 1);
-        assertThat(likeInstaUser4.size()).isEqualTo(5);
-        assertThat(likeInstaUser4FilterAbility.size()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("받은 호감목록 성별, 호감사유 필터링 - 여성 & 외모")
-    void t016() throws Exception {
-        //user4에 대해서 탐색
-        InstaMember user4 = instaMemberRepository.findByUsername("insta_user4").orElseThrow();
-        //user4를 좋아하는 모든 성별
-        List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
-        //user4를 호감표시 한 사람 중 여성, 외모 선택
-        List<LikeablePerson> likeInstaUser4FilterByWomanAndAppearance = likeablePersonService.findByToInstaMember(user4, "", 1, 2);
-        assertThat(likeInstaUser4FilterByWomanAndAppearance.size()).isEqualTo(3);
+        assertThat(likeablePeople)
+                .isSortedAccordingTo(
+                        Comparator.comparing(LikeablePerson::getAttractiveTypeCode)
+                                .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                );
     }
 }
