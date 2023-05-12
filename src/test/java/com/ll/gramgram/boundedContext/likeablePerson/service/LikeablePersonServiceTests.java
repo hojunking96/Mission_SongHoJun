@@ -322,7 +322,7 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 남성
-        List<LikeablePerson> likeInstaUser4FilterMan = likeablePersonService.classify(user4, "M", null);
+        List<LikeablePerson> likeInstaUser4FilterMan = likeablePersonService.findByToInstaMember(user4, "M", 0, 1);
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterMan.size()).isEqualTo(2);
     }
@@ -335,7 +335,7 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 여성
-        List<LikeablePerson> likeInstaUser4FilterWoman = likeablePersonService.classify(user4, "W", null);
+        List<LikeablePerson> likeInstaUser4FilterWoman = likeablePersonService.findByToInstaMember(user4, "W", 0, 1);
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterWoman.size()).isEqualTo(3);
     }
@@ -348,10 +348,11 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 외모 선택
-        List<LikeablePerson> likeInstaUser4FilterAppearance = likeablePersonService.classify(user4, null, 1);
+        List<LikeablePerson> likeInstaUser4FilterAppearance = likeablePersonService.findByToInstaMember(user4, "", 1, 1);
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterAppearance.size()).isEqualTo(3);
     }
+
     @Test
     @DisplayName("받은 호감목록 호감사유 필터링 - 성격")
     void t014() throws Exception {
@@ -360,10 +361,11 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 성격 선택
-        List<LikeablePerson> likeInstaUser4FilterCharacter = likeablePersonService.classify(user4, null, 2);
+        List<LikeablePerson> likeInstaUser4FilterCharacter = likeablePersonService.findByToInstaMember(user4, "", 2, 1);
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterCharacter.size()).isEqualTo(1);
     }
+
     @Test
     @DisplayName("받은 호감목록 호감사유 필터링 - 능력")
     void t015() throws Exception {
@@ -372,10 +374,11 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 능력 선택
-        List<LikeablePerson> likeInstaUser4FilterAbility = likeablePersonService.classify(user4, null, 3);
+        List<LikeablePerson> likeInstaUser4FilterAbility = likeablePersonService.findByToInstaMember(user4, "", 3, 1);
         assertThat(likeInstaUser4.size()).isEqualTo(5);
         assertThat(likeInstaUser4FilterAbility.size()).isEqualTo(1);
     }
+
     @Test
     @DisplayName("받은 호감목록 성별, 호감사유 필터링 - 여성 & 외모")
     void t016() throws Exception {
@@ -384,8 +387,7 @@ public class LikeablePersonServiceTests {
         //user4를 좋아하는 모든 성별
         List<LikeablePerson> likeInstaUser4 = likeablePersonRepository.findByToInstaMember_username("insta_user4");
         //user4를 호감표시 한 사람 중 여성, 외모 선택
-        List<LikeablePerson> likeInstaUser4FilterByWomanAndAppearance = likeablePersonService.classify(user4, null, 1);
-//        assertThat(likeInstaUser4.size()).isEqualTo(5);
+        List<LikeablePerson> likeInstaUser4FilterByWomanAndAppearance = likeablePersonService.findByToInstaMember(user4, "", 1, 2);
         assertThat(likeInstaUser4FilterByWomanAndAppearance.size()).isEqualTo(3);
     }
 }
