@@ -222,60 +222,51 @@ public class LikeablePersonService {
         return RsData.of("S-1", "호감사유변경이 가능합니다.");
     }
 
-    public List<LikeablePerson> classify(InstaMember instaMember, String gender, Integer attractiveTypeCode) {
-        List<LikeablePerson> likeablePeople = instaMember.getToLikeablePeople();
-        likeablePeople = classifyByGender(likeablePeople, gender);
-        likeablePeople = classifyByAttractiveTypeCode(likeablePeople, attractiveTypeCode);
-        return likeablePeople;
-    }
+    public List<LikeablePerson> findByToInstaMember(InstaMember instaMember, String gender, int attractiveTypeCode, int sortCode) {
+        Stream<LikeablePerson> likeablePeopleStream = instaMember.getToLikeablePeople().stream();
 
-    private List<LikeablePerson> classifyByGender(List<LikeablePerson> likeablePeople, String gender) {
-        if (gender != null) {
-            if (gender.equals("M")) {
-                return likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("M")).toList();
-            } else if (gender.equals("W")) {
-                return likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("W")).toList();
-            }
+        if (!gender.isEmpty()) {
+            likeablePeopleStream = likeablePeopleStream
+                    .filter(likeablePerson -> likeablePerson.getFromInstaMember().getGender().equals(gender));
         }
-        return likeablePeople;
-    }
 
-    private List<LikeablePerson> classifyByAttractiveTypeCode(List<LikeablePerson> likeablePeople, Integer attractiveTypeCode) {
-        if (attractiveTypeCode != null) {
-            return likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == attractiveTypeCode).toList();
+        if (attractiveTypeCode != 0) {
+            likeablePeopleStream = likeablePeopleStream
+                    .filter(likeablePerson -> likeablePerson.getAttractiveTypeCode() == attractiveTypeCode);
         }
-        return likeablePeople;
-    }
 
-    public List<LikeablePerson> sortBySortCode(List<LikeablePerson> likeablePeople, Integer sortCode) {
-        Stream<LikeablePerson> likeablePeopleStream = likeablePeople.stream();
-        if (sortCode == 1) {
-            likeablePeopleStream = likeablePeopleStream
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-        } else if (sortCode == 2) {
-            likeablePeopleStream = likeablePeopleStream
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate));
-        } else if (sortCode == 3) {
-            likeablePeopleStream = likeablePeopleStream
-                    .sorted((o1, o2) -> Math.toIntExact(o2.getFromInstaMember().getLikes() - o1.getFromInstaMember().getLikes()));
-        } else if (sortCode == 4) {
-            likeablePeopleStream = likeablePeopleStream
-                    .sorted(Comparator.comparingLong(o -> o.getFromInstaMember().getLikes()));
-        } else if (sortCode == 5) {
-            Stream<LikeablePerson> fromFemale = likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("W"))
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-            Stream<LikeablePerson> fromMale = likeablePeople.stream().filter(x -> x.getFromInstaMember().getGender().equals("M"))
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-            likeablePeopleStream = Stream.concat(fromFemale, fromMale);
-        } else if (sortCode == 6) {
-            Stream<LikeablePerson> byAppearance = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 1)
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-            Stream<LikeablePerson> byPersonality = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 2)
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-            Stream<LikeablePerson> byAbility = likeablePeople.stream().filter(x -> x.getAttractiveTypeCode() == 3)
-                    .sorted(Comparator.comparing(LikeablePerson::getModifyDate).reversed());
-            likeablePeopleStream = Stream.concat(byAppearance, Stream.concat(byPersonality, byAbility));
-        }
+        likeablePeopleStream = switch (sortCode) {
+            case 2 -> likeablePeopleStream
+                    .sorted(
+                            Comparator.comparing(LikeablePerson::getId)
+                    );
+            case 3 -> likeablePeopleStream
+                    .sorted(
+                            Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getLikes()).reversed()
+                                    .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                    );
+            case 4 -> likeablePeopleStream
+                    .sorted(
+                            Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getLikes())
+                                    .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                    );
+            case 5 -> likeablePeopleStream
+                    .sorted(
+                            Comparator.comparing((LikeablePerson lp) -> lp.getFromInstaMember().getGender()).reversed()
+                                    .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                    );
+            case 6 -> likeablePeopleStream
+                    .sorted(
+                            Comparator.comparing(LikeablePerson::getAttractiveTypeCode)
+                                    .thenComparing(Comparator.comparing(LikeablePerson::getId).reversed())
+                    );
+            default -> likeablePeopleStream;
+        };
+
         return likeablePeopleStream.toList();
+    }
+
+    public List<LikeablePerson> findByToInstaMember(String username, String gender, int attractiveTypeCode, int sortCode) {
+        return findByToInstaMember(instaMemberService.findByUsername(username).get(), gender, attractiveTypeCode, sortCode);
     }
 }

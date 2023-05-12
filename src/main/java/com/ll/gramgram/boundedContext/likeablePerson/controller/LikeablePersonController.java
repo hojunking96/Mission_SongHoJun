@@ -15,7 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/usr/likeablePerson")
@@ -123,17 +126,18 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/toList")
     public String showToList(Model model,
-                             @RequestParam(name = "gender", required = false) String gender,
-                             @RequestParam(name = "attractiveTypeCode", required = false) Integer attractiveTypeCode,
-                             @RequestParam(name = "sortCode", defaultValue = "1") Integer sortCode) {
+                             @RequestParam(defaultValue = "") String gender,
+                             @RequestParam(defaultValue = "0") int attractiveTypeCode,
+                             @RequestParam(defaultValue = "1") int sortCode) {
         InstaMember instaMember = rq.getMember().getInstaMember();
 
         // 인스타인증을 했는지 체크
         if (instaMember != null) {
-            List<LikeablePerson> likeablePeople = likeablePersonService.classify(instaMember, gender, attractiveTypeCode);
-            likeablePeople = likeablePersonService.sortBySortCode(likeablePeople, sortCode);
+            List<LikeablePerson> likeablePeople = likeablePersonService.findByToInstaMember(instaMember, gender, attractiveTypeCode, sortCode);
+
             model.addAttribute("likeablePeople", likeablePeople);
         }
+
         return "usr/likeablePerson/toList";
     }
 }
